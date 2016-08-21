@@ -1,19 +1,20 @@
 import { StyleSheet, View } from 'react-native';
-import { merge } from 'lodash';
+import { merge, cloneDeep } from 'lodash';
 
 import themable from './themable';
 
 function registerTheme(theme) {
-  if (this.themes) this.themes[theme] = this.themes[theme] || {};
-  ThemeManager.themeVariables[theme] = ThemeManager.themeVariables[theme] || {};
+  const _theme = theme || ThemeManager.globalTheme;
+
+  if (this.themes) this.themes[_theme] = this.themes[_theme] || {};
+  ThemeManager.themeVariables[_theme] = ThemeManager.themeVariables[_theme] || {};
 }
 
 function registerProperties(stylesObj) {
   if (!stylesObj) return {};
 
   const properties = {};
-  const keys = Object.keys(stylesObj);
-  for (const key of keys) {
+  for (key in stylesObj) {
     properties[key] = {
       configurable: true,
       get: () => this.getPropertyFromTheme(this.currentTheme, key),
@@ -26,27 +27,50 @@ function registerProperties(stylesObj) {
   return stylesObj;
 }
 
-function addThemeVariables(theme, variables) {
-  if (!theme) return addGlobalVariables(variables);
-
-  registerTheme(theme);
-  Object.assign(ThemeManager.themeVariables[theme], variables);
+function isVariable(key) {
+  return typeof key === 'string' && key[0] === '$';
 }
 
-function addGlobalVariables(variables) {
-  if (!ThemeManager.globalTheme) return;
+function fixVariableName(variableName) {
+  return isVariable(variableName) ? variableName.slice(1) : variableName;
+}
 
-  addThemeVariables(ThemeManager.globalTheme, variables);
+function fixVariableNames(variablesObject) {
+  if (!variablesObject) return {};
+
+  let fixedVariables = {};
+  for(key in variablesObject) fixedVariables[fixVariableName(key)] = variablesObject[key];
+
+  return fixedVariables;
 }
 
 function addStyle(theme, stylesObj) {
-  registerTheme(theme);
-  return merge(this.themes[theme], stylesObj);
+  const _theme = theme || ThemeManager.globalTheme;
+
+  registerTheme(_theme);
+  return merge(this.themes[_theme], stylesObj);
+}
+
+function addThemeVariables(theme, variables) {
+  const _theme = theme || ThemeManager.globalTheme;
+  if (!_theme) return;
+
+  registerTheme(_theme);
+  Object.assign(ThemeManager.themeVariables[_theme], fixVariableNames(variables));
+}
+
+function parseStyle(theme, style) {
+  if (typeof style === 'string' && style[0] === '$') return ThemeManager.getVariable(theme, style);
+  if (typeof style !== 'object') return style;
+
+  const _theme = theme || ThemeManager.globalTheme;
+  const parsedStyle = cloneDeep(style);
+  for(key in parsedStyle) parsedStyle[key] = parseStyle(_theme, parsedStyle[key]);
+  return parsedStyle;
 }
 
 export default class ThemeManager {
   static globalTheme = 'default';
-  static themes = {};
   static themeVariables = {};
   static config = {
     styleSheetReference: StyleSheet,
@@ -56,13 +80,14 @@ export default class ThemeManager {
   constructor() {
     this.styles = {};
     this.themes = {};
-    this.currentTheme = this.globalTheme;
+    this.localThemeVariables = {};
+    this.currentTheme = ThemeManager.globalTheme;
 
     addStyle = addStyle.bind(this);
     registerTheme = registerTheme.bind(this);
     registerProperties = registerProperties.bind(this);
 
-    registerTheme(this.globalTheme);
+    registerTheme(ThemeManager.globalTheme);
   }
 
   static config({ styleSheetReference }) {
@@ -87,7 +112,10 @@ export default class ThemeManager {
   }
 
   static getVariable(theme, variableName) {
-    return (this.themeVariables[theme] || {})[variableName];
+    const _variableName = variableName[0] === '$' ? variableName.slice(1) : variableName;
+    
+    return (theme && (this.themeVariables[theme] || {})[_variableName]) 
+      || (ThemeManager.config.fallbackToGlobalTheme && (this.themeVariables[ThemeManager.globalTheme] || {})[_variableName]);
   }
 
   create(themes = [], styleObj) {
@@ -99,7 +127,7 @@ export default class ThemeManager {
       _themes = [ThemeManager.globalTheme];
       _styleObj = arguments[0];
     } else {
-      _themes = (Array.isArray(themes) ? themes : [themes]).filter(Boolean);
+      _themes = Array.isArray(themes) ? themes : [themes];
       _styleObj = styleObj || {};
     }
 
@@ -111,14 +139,21 @@ export default class ThemeManager {
   }
 
   getPropertyFromTheme(theme, propertyName) {
-    if ((this.themes[theme] || {})[propertyName] !== undefined)
-      return (this.themes[theme] || {})[propertyName];
+    let _theme;
+    let value;
 
-    if (ThemeManager.config.fallbackToGlobalTheme
-      && this.themes[ThemeManager.globalTheme][propertyName] !== undefined)
-      return this.themes[ThemeManager.globalTheme][propertyName];
+    if ((this.themes[theme] || {})[propertyName] !== undefined) {
+      _theme = theme;
+      value = (this.themes[theme] || {})[propertyName];
+    }
 
-    return null;
+    else if (ThemeManager.config.fallbackToGlobalTheme
+      && this.themes[ThemeManager.globalTheme][propertyName] !== undefined) {
+      _theme = ThemeManager.globalTheme;
+      value = this.themes[ThemeManager.globalTheme][propertyName];
+    }
+
+    return parseStyle(_theme, value);
   }
 
   setTheme(theme) {
@@ -126,9 +161,7 @@ export default class ThemeManager {
     if (this.currentTheme === _theme) return _theme;
 
     this.currentTheme = _theme;
-
-    const styles = this.getStyles(this.currentTheme);
-    this.styles = styles; // ThemeManager.config.styleSheetReference.create(styles);
+    this.styles = this.getStyles(this.currentTheme); // ThemeManager.config.styleSheetReference.create(styles);
 
     return this.currentTheme;
   }
@@ -137,7 +170,7 @@ export default class ThemeManager {
     const _theme = theme || this.currentTheme;
     const _globalStyles = (ThemeManager.config.fallbackToGlobalTheme && this.themes[ThemeManager.globalTheme]) || {};
 
-    return merge({}, _globalStyles, this.themes[_theme]);
+    return parseStyle(_theme, merge({}, _globalStyles, this.themes[_theme]));
   }
 
   attach(component) {

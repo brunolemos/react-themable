@@ -13,10 +13,10 @@ $ npm i -S react-native-theme-manager
 ### Features (implemented)
  - [x] Change component theme using `theme` prop
  - [x] Get theme from parent components using `theme` context
+ - [x] Support global variables per theme (e.g. `$backgroundColor`)
 
 ### TODOs (under development)
- - [ ] Support variables inside themes
- - [ ] Performance optimization (memoize styles creation)
+ - [ ] Performance optimization (use cache to prevent style creation)
 
 
 ### Example
@@ -32,6 +32,15 @@ import { AppRegistry, View } from 'react-native';
 import ThemeManager, { themable } from 'react-native-theme-manager';
 
 import Button from './src/components/Button';
+
+// tip: import this from a different file
+const darkThemeVariables = { backgroundColor: '#333333', color: '#666666' };
+const lightThemeVariables = { backgroundColor: '#eeeeee', color: '#111111' };
+
+// configure variables (optional, but makes life easier)
+ThemeManager.addVariables('dark', darkThemeVariables);
+ThemeManager.addVariables('light', lightThemeVariables);
+
 const ThemableView = themable(View);
 
 export default App = () => (
@@ -43,6 +52,7 @@ export default App = () => (
 );
 
 AppRegistry.registerComponent('yourPackageName', () => App);
+
 ```
 
 `src/Button.js`
@@ -66,27 +76,18 @@ const Button = (props, context) => {
 
 const themeManager = new ThemeManager();
 
-themeManager.create({
-  view: { height: 100 },
-  text: { fontSize: 20, textAlign: 'center', marginTop: 40 }
+// complex example: global theme + multiple themes + theme variables
+themeManager.create([null, 'dark', 'light'], {
+  view: { height: 100, backgroundColor: '$backgroundColor' },
+  text: { fontSize: 20, textAlign: 'center', marginTop: 40, color: '$textColor'}
 });
 
-themeManager.create('light', {
-  view: { backgroundColor: '#eeeeee' },
-  text: { color: '#111111' },
-});
-
-themeManager.create('dark', {
-  view: { backgroundColor: '#333333' },
-  text: { color: '#666666' },
-});
-
+// simple example
 themeManager.create('blue', {
   text: { color: '#5685ee' },
 });
 
 export default themeManager.attach(Button);
-
 ```
 
 
