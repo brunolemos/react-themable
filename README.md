@@ -15,13 +15,15 @@ $ npm i -S react-native-theme-manager
  - [x] Get theme from parent components using `theme` context
 
 ### TODOs (under development)
- - [ ] Global theme variables
+ - [ ] Support variables inside themes
  - [ ] Performance optimization (memoize styles creation)
 
 
 ### Example
 
-You can copy and paste the two files above for a fully working example:
+You can copy and paste the two files below for a fully working example:
+
+![Screenshot from example](example.png)
 
 `App.js`
 ```js
