@@ -1,4 +1,3 @@
-import { StyleSheet, View } from 'react-native';
 import { merge, cloneDeep } from 'lodash';
 
 import themable from './themable';
@@ -14,7 +13,7 @@ function registerProperties(stylesObj) {
   if (!stylesObj) return {};
 
   const properties = {};
-  for (key in stylesObj) {
+  for (const key in stylesObj) {
     properties[key] = {
       configurable: true,
       get: () => this.getPropertyFromTheme(this.currentTheme, key),
@@ -39,7 +38,7 @@ function fixVariableNames(variablesObject) {
   if (!variablesObject) return {};
 
   let fixedVariables = {};
-  for(key in variablesObject) fixedVariables[fixVariableName(key)] = variablesObject[key];
+  for (const key in variablesObject) fixedVariables[fixVariableName(key)] = variablesObject[key];
 
   return fixedVariables;
 }
@@ -65,7 +64,7 @@ function parseStyle(theme, style) {
 
   const _theme = theme || ThemeManager.globalTheme;
   const parsedStyle = cloneDeep(style);
-  for(key in parsedStyle) parsedStyle[key] = parseStyle(_theme, parsedStyle[key]);
+  for (const key in parsedStyle) parsedStyle[key] = parseStyle(_theme, parsedStyle[key]);
   return parsedStyle;
 }
 
@@ -73,7 +72,7 @@ export default class ThemeManager {
   static globalTheme = 'default';
   static themeVariables = {};
   static config = {
-    styleSheetReference: StyleSheet,
+    styleSheetReference: null, // { StyleSheet } from 'react-native' or a custom one like EStyleSheet
     fallbackToGlobalTheme: true,
   };
 
@@ -113,8 +112,8 @@ export default class ThemeManager {
 
   static getVariable(theme, variableName) {
     const _variableName = variableName[0] === '$' ? variableName.slice(1) : variableName;
-    
-    return (theme && (this.themeVariables[theme] || {})[_variableName]) 
+
+    return (theme && (this.themeVariables[theme] || {})[_variableName])
       || (ThemeManager.config.fallbackToGlobalTheme && (this.themeVariables[ThemeManager.globalTheme] || {})[_variableName]);
   }
 
