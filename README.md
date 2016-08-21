@@ -10,18 +10,16 @@ Goal: Make it easier to support multiple themes in an app (e.g `light` and `dark
 $ npm i -S react-native-theme-manager
 ```
 
-### Features (implemented)
+### Features
  - [x] Change component theme using `theme` prop
  - [x] Get theme from parent components using `theme` context
  - [x] Support global variables per theme (e.g. `$backgroundColor`)
-
-### TODOs (under development)
- - [ ] Performance optimization (use cache to prevent style creation)
+ - [ ] Use cache (memoize) to prevent unneed style recreation
 
 
 ### Example
 
-![Screenshot from example](example.png)
+![Screenshot from example](https://raw.githubusercontent.com/brunolemos/react-native-theme-manager/master/example.png)
 
 You can copy and paste both files below for a fully working example:
 
