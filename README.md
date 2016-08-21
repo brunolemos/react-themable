@@ -33,11 +33,15 @@ import ThemeManager, { themable } from 'react-native-theme-manager';
 
 import Button from './src/components/Button';
 
-// tip: import this from a different file
+// tip: import theme variables from different files (e.g. ./themes/dark.theme.js)
+const globalThemeVariables = { fontSize: 20 };
 const darkThemeVariables = { backgroundColor: '#333333', color: '#666666' };
 const lightThemeVariables = { backgroundColor: '#eeeeee', color: '#111111' };
 
 // configure variables (optional, but makes life easier)
+// if I dont pass a theme, styles will be applied globally.
+// you can also specify the themes as an array at the first argument (e.g. ['dark', 'light'])
+ThemeManager.addVariables(globalThemeVariables);
 ThemeManager.addVariables('dark', darkThemeVariables);
 ThemeManager.addVariables('light', lightThemeVariables);
 
@@ -51,8 +55,7 @@ export default App = () => (
   </ThemableView>
 );
 
-AppRegistry.registerComponent('yourPackageName', () => App);
-
+AppRegistry.registerComponent('App', () => App);
 ```
 
 `src/Button.js`
@@ -76,15 +79,17 @@ const Button = (props, context) => {
 
 const themeManager = new ThemeManager();
 
-// complex example: global theme + multiple themes + theme variables
-themeManager.create([null, 'dark', 'light'], {
-  view: { height: 100, backgroundColor: '$backgroundColor' },
-  text: { fontSize: 20, textAlign: 'center', marginTop: 40, color: '$textColor'}
-});
-
-// simple example
+// simple mode -- styles applied only on blue theme
 themeManager.create('blue', {
   text: { color: '#5685ee' },
+});
+
+// if I dont pass a theme, styles will be applied globally.
+// variables will still get the correspondent theme value.
+// you can also specify the themes as an array at the first argument (e.g. ['dark', 'light'])
+themeManager.create({
+  view: { height: 100, backgroundColor: '$backgroundColor' },
+  text: { fontSize: '$fontSize', textAlign: 'center', marginTop: 40, color: '$textColor'}
 });
 
 export default themeManager.attach(Button);
