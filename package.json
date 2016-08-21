@@ -1,14 +1,14 @@
 {
-  "name": "react-native-theme-manager",
-  "version": "0.4.0",
+  "name": "react-themable",
+  "version": "0.4.2",
   "description": "",
   "main": "lib/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/brunolemos/react-native-theme-manager"
+    "url": "https://github.com/brunolemos/react-themable"
   },
   "bugs": {
-    "url": "https://github.com/brunolemos/react-native-theme-manager/issues"
+    "url": "https://github.com/brunolemos/react-themable/issues"
   },
   "scripts": {
     "compile": "babel -d lib/ src/",

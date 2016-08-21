@@ -1,16 +1,17 @@
 # React & React Native Theme Manager
 
-Goal: Make it easier to support multiple themes in an app (e.g `light` and `dark`).
+Goal: Make it easier to support multiple styles in your app (e.g light and dark theme).
 
 -- Contributions are welcome!
 
 ## Install
 
 ```sh
-$ npm i -S react-native-theme-manager
+$ npm i -S react-themable
 ```
 
 ### Features
+ - [x] `React` and `React Native` support
  - [x] Change component theme using `theme` prop
  - [x] Get theme from parent components using `theme` context
  - [x] Support global variables per theme (e.g. `$backgroundColor`)
@@ -19,7 +20,7 @@ $ npm i -S react-native-theme-manager
 
 ### Example
 
-![Screenshot from example](https://raw.githubusercontent.com/brunolemos/react-native-theme-manager/master/example.png)
+![Screenshot from example](https://raw.githubusercontent.com/brunolemos/react-themable/master/example.png)
 
 You can copy and paste both files below for a fully working example:
 
@@ -27,7 +28,7 @@ You can copy and paste both files below for a fully working example:
 ```js
 import React, { Component } from 'react';
 import { AppRegistry, View } from 'react-native';
-import ThemeManager, { themable } from 'react-native-theme-manager';
+import ThemeManager, { themable } from 'react-themable';
 
 import Button from './src/components/Button';
 
@@ -60,7 +61,7 @@ AppRegistry.registerComponent('App', () => App);
 ```js
 import React, { Component } from 'react';
 import { Text, View } from 'react-native';
-import ThemeManager from 'react-native-theme-manager';
+import ThemeManager from 'react-themable';
 
 const Button = (props, context) => {
   // if you are not using a pure funciton,
