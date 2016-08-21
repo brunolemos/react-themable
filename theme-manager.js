@@ -21,7 +21,7 @@ function registerProperties(stylesObj) {
   }
 
   Object.defineProperties(stylesObj, properties);
-  Object.defineProperties(this.styles, properties);
+  merge(this.styles, stylesObj);
 
   return stylesObj;
 }
@@ -41,7 +41,7 @@ function addGlobalVariables(variables) {
 
 function addStyle(theme, stylesObj) {
   registerTheme(theme);
-  return Object.assign(this.themes[theme], stylesObj);
+  return merge(this.themes[theme], stylesObj);
 }
 
 export default class ThemeManager {
@@ -104,9 +104,9 @@ export default class ThemeManager {
     }
 
     // create styles for each specified theme
-    _themes.map((theme) => addStyle(theme, styleObj));
+    _themes.map((theme) => addStyle(theme, _styleObj));
 
-    registerProperties(styleObj);
+    registerProperties(_styleObj);
     return this.styles;
   }
 
@@ -122,12 +122,15 @@ export default class ThemeManager {
   }
 
   setTheme(theme) {
-    this.currentTheme = theme || ThemeManager.globalTheme;
-    return this.currentTheme;
+    const _theme = theme || ThemeManager.globalTheme;
+    if (this.currentTheme === _theme) return _theme;
 
-    // const styles = this.getStyles(this.currentTheme);
-    // this.styles = ThemeManager.config.styleSheetReference.create(styles);
-    // this.styles = this.getStyles(this.currentTheme);
+    this.currentTheme = _theme;
+
+    const styles = this.getStyles(this.currentTheme);
+    this.styles = styles; // ThemeManager.config.styleSheetReference.create(styles);
+
+    return this.currentTheme;
   }
 
   getStyles(theme) {
