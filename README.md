@@ -21,9 +21,9 @@ $ npm i -S react-native-theme-manager
 
 ### Example
 
-You can copy and paste the two files below for a fully working example:
-
 ![Screenshot from example](example.png)
+
+You can copy and paste both files below for a fully working example:
 
 `App.js`
 ```js
@@ -48,24 +48,20 @@ AppRegistry.registerComponent('yourPackageName', () => App);
 `src/Button.js`
 ```js
 import React, { Component } from 'react';
-import { AppRegistry, StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import ThemeManager from 'react-native-theme-manager';
 
-class Button extends Component {
-  constructor(props) {
-    super(props);
-  }
+const Button = (props, context) => {
+  // if you are not using a pure funciton,
+  // you access the theme via this.context.theme
+  themeManager.setTheme(context.theme);
+  const { styles } = themeManager;
 
-  render() {
-    themeManager.setTheme(this.context.theme);
-    const { styles } = themeManager;
-
-    return (
-      <View style={styles.view}>
-        <Text style={styles.text}>{this.props.children}</Text>
-      </View>
-    );
-  }
+  return (
+    <View style={styles.view}>
+      <Text style={styles.text}>{props.children}</Text>
+    </View>
+  );
 }
 
 const themeManager = new ThemeManager();
