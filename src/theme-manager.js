@@ -16,7 +16,7 @@ function registerProperties(stylesObj) {
   for (const key in stylesObj) {
     properties[key] = {
       configurable: true,
-      get: () => this.getPropertyFromTheme(this.currentTheme, key),
+      get: () => this.getPropertyFromTheme(this.theme, key),
     };
   }
 
@@ -80,7 +80,7 @@ export default class ThemeManager {
     this.styles = {};
     this.themes = {};
     this.localThemeVariables = {};
-    this.currentTheme = ThemeManager.globalTheme;
+    this.theme = ThemeManager.globalTheme;
 
     registerTheme.bind(this)(ThemeManager.globalTheme);
   }
@@ -155,16 +155,16 @@ export default class ThemeManager {
 
   setTheme(theme) {
     const _theme = theme || ThemeManager.globalTheme;
-    if (this.currentTheme === _theme) return _theme;
+    if (this.theme === _theme) return _theme;
 
-    this.currentTheme = _theme;
-    this.styles = this.getStyles(this.currentTheme); // ThemeManager.config.styleSheetReference.create(styles);
+    this.theme = _theme;
+    this.styles = this.getStyles(this.theme); // ThemeManager.config.styleSheetReference.create(styles);
 
-    return this.currentTheme;
+    return this.theme;
   }
 
   getStyles(theme) {
-    const _theme = theme || this.currentTheme;
+    const _theme = theme || this.theme;
     const _globalStyles = (ThemeManager.config.fallbackToGlobalTheme && this.themes[ThemeManager.globalTheme]) || {};
 
     this.setTheme(_theme);
