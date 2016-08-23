@@ -71,22 +71,22 @@ function parseStyle(theme, style) {
 export default class ThemeManager {
   static globalTheme = 'default';
   static themeVariables = {};
-  static config = {
-    styleSheetReference: null, // { StyleSheet } from 'react-native' or a custom one like EStyleSheet
+  static _config = {
+    StyleSheet: null, // { StyleSheet } from 'react-native' or a custom one like EStyleSheet
     fallbackToGlobalTheme: true,
   };
 
-  constructor() {
+  constructor(config) {
+    this.config = Object.assign({}, ThemeManager._config, config || {});
     this.styles = {};
     this.themes = {};
-    this.localThemeVariables = {};
     this.theme = ThemeManager.globalTheme;
 
     registerTheme.bind(this)(ThemeManager.globalTheme);
   }
 
-  static config({ styleSheetReference }) {
-    if (styleSheetReference) this.config.styleSheetReference = styleSheetReference;
+  static config(config) {
+    if (config) ThemeManager._config = Object.assign({}, ThemeManager._config, config);
   }
 
   static addVariables(themes = [], variables = {}) {
@@ -110,7 +110,7 @@ export default class ThemeManager {
     const _variableName = variableName[0] === '$' ? variableName.slice(1) : variableName;
 
     const value = (theme && get(this.themeVariables[theme], _variableName))
-      || (ThemeManager.config.fallbackToGlobalTheme && get(this.themeVariables[ThemeManager.globalTheme], _variableName));
+      || (ThemeManager._config.fallbackToGlobalTheme && get(this.themeVariables[ThemeManager.globalTheme], _variableName));
 
     return value === undefined ? `$${_variableName}` : value;
   }
@@ -144,7 +144,7 @@ export default class ThemeManager {
       value = get(this.themes[theme], propertyName);
     }
 
-    else if (ThemeManager.config.fallbackToGlobalTheme
+    else if (ThemeManager._config.fallbackToGlobalTheme
       && get(this.themes[ThemeManager.globalTheme], propertyName) !== undefined) {
       _theme = ThemeManager.globalTheme;
       value = get(this.themes[ThemeManager.globalTheme], propertyName);
@@ -158,14 +158,14 @@ export default class ThemeManager {
     if (this.theme === _theme) return _theme;
 
     this.theme = _theme;
-    this.styles = this.getStyles(this.theme); // ThemeManager.config.styleSheetReference.create(styles);
+    this.styles = this.getStyles(this.theme); // ThemeManager._config.StyleSheet.create(styles);
 
     return this.theme;
   }
 
   getStyles(theme) {
     const _theme = theme || this.theme;
-    const _globalStyles = (ThemeManager.config.fallbackToGlobalTheme && this.themes[ThemeManager.globalTheme]) || {};
+    const _globalStyles = (ThemeManager._config.fallbackToGlobalTheme && this.themes[ThemeManager.globalTheme]) || {};
 
     this.setTheme(_theme);
     return parseStyle(_theme, merge({}, _globalStyles, this.themes[_theme]));
