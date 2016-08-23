@@ -171,6 +171,7 @@ export default class ThemeManager {
   }
 
   attach(component) {
+    console.warn('DEPRECATED: themeManager.attach(Component). Use themable(Component) instead.')
     return themable(component);
   }
 };
