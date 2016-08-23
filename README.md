@@ -7,7 +7,7 @@ Goal: Make it easier to support multiple styles in your app (e.g light and dark 
 ## Install
 
 ```sh
-$ npm i -S react-themable
+$ npm i -S react-themable@latest
 ```
 
 ### Features
@@ -61,7 +61,7 @@ AppRegistry.registerComponent('App', () => App);
 ```js
 import React, { Component } from 'react';
 import { Text, View } from 'react-native';
-import ThemeManager from 'react-themable';
+import ThemeManager, { themable } from 'react-themable';
 
 const Button = (props, context) => {
   // if you are not using a pure funciton,
@@ -91,7 +91,7 @@ themeManager.create({
   text: { fontSize: '$fontSize', textAlign: 'center', marginTop: 40, color: '$textColor'}
 });
 
-export default themeManager.attach(Button);
+export default themable(Button);
 ```
 
 
