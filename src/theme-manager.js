@@ -167,6 +167,7 @@ export default class ThemeManager {
     const _theme = theme || this.currentTheme;
     const _globalStyles = (ThemeManager.config.fallbackToGlobalTheme && this.themes[ThemeManager.globalTheme]) || {};
 
+    this.setTheme(_theme);
     return parseStyle(_theme, merge({}, _globalStyles, this.themes[_theme]));
   }
 
