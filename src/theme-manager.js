@@ -1,11 +1,11 @@
-import { merge, cloneDeep } from 'lodash';
+import { cloneDeep, get, merge } from 'lodash';
 
 import themable from './themable';
 
 function registerTheme(theme) {
   const _theme = theme || ThemeManager.globalTheme;
 
-  if (this.themes) this.themes[_theme] = this.themes[_theme] || {};
+  if ((this || {}).themes) this.themes[_theme] = this.themes[_theme] || {};
   ThemeManager.themeVariables[_theme] = ThemeManager.themeVariables[_theme] || {};
 }
 
@@ -46,7 +46,7 @@ function fixVariableNames(variablesObject) {
 function addStyle(theme, stylesObj) {
   const _theme = theme || ThemeManager.globalTheme;
 
-  registerTheme(_theme);
+  registerTheme.bind(this)(_theme);
   return merge(this.themes[_theme], stylesObj);
 }
 
@@ -59,7 +59,7 @@ function addThemeVariables(theme, variables) {
 }
 
 function parseStyle(theme, style) {
-  if (typeof style === 'string' && style[0] === '$') return ThemeManager.getVariable(theme, style);
+  if (isVariable(style)) return ThemeManager.getVariable(theme, style);
   if (typeof style !== 'object') return style;
 
   const _theme = theme || ThemeManager.globalTheme;
@@ -82,11 +82,7 @@ export default class ThemeManager {
     this.localThemeVariables = {};
     this.currentTheme = ThemeManager.globalTheme;
 
-    addStyle = addStyle.bind(this);
-    registerTheme = registerTheme.bind(this);
-    registerProperties = registerProperties.bind(this);
-
-    registerTheme(ThemeManager.globalTheme);
+    registerTheme.bind(this)(ThemeManager.globalTheme);
   }
 
   static config({ styleSheetReference }) {
@@ -113,8 +109,10 @@ export default class ThemeManager {
   static getVariable(theme, variableName) {
     const _variableName = variableName[0] === '$' ? variableName.slice(1) : variableName;
 
-    return (theme && (this.themeVariables[theme] || {})[_variableName])
-      || (ThemeManager.config.fallbackToGlobalTheme && (this.themeVariables[ThemeManager.globalTheme] || {})[_variableName]);
+    const value = (theme && get(this.themeVariables[theme], _variableName))
+      || (ThemeManager.config.fallbackToGlobalTheme && get(this.themeVariables[ThemeManager.globalTheme], _variableName));
+
+    return value === undefined ? `$${_variableName}` : value;
   }
 
   create(themes = [], styleObj) {
@@ -131,9 +129,9 @@ export default class ThemeManager {
     }
 
     // create styles for each specified theme
-    _themes.map((theme) => addStyle(theme, _styleObj));
+    _themes.map((theme) => addStyle.bind(this)(theme, _styleObj));
 
-    registerProperties(_styleObj);
+    registerProperties.bind(this)(_styleObj);
     return this.styles;
   }
 
@@ -141,15 +139,15 @@ export default class ThemeManager {
     let _theme;
     let value;
 
-    if ((this.themes[theme] || {})[propertyName] !== undefined) {
+    if (get(this.themes[theme], propertyName) !== undefined) {
       _theme = theme;
-      value = (this.themes[theme] || {})[propertyName];
+      value = get(this.themes[theme], propertyName);
     }
 
     else if (ThemeManager.config.fallbackToGlobalTheme
-      && this.themes[ThemeManager.globalTheme][propertyName] !== undefined) {
+      && get(this.themes[ThemeManager.globalTheme], propertyName) !== undefined) {
       _theme = ThemeManager.globalTheme;
-      value = this.themes[ThemeManager.globalTheme][propertyName];
+      value = get(this.themes[ThemeManager.globalTheme], propertyName);
     }
 
     return parseStyle(_theme, value);

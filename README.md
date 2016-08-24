@@ -14,7 +14,7 @@ $ npm i -S react-themable
  - [x] `React` and `React Native` support
  - [x] Change component theme using `theme` prop
  - [x] Get theme from parent components using `theme` context
- - [x] Support global variables per theme (e.g. `$backgroundColor`)
+ - [x] Support global variables per theme (e.g. `$backgroundColor` or nested `$card.backgroundColor`)
  - [ ] Use cache (memoize) to prevent unneed style recreation
 
 
